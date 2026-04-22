@@ -765,6 +765,41 @@ export const LedgerPage: React.FC = () => {
       setLoading(false);
     }
   };
+  const getRunningTransactions = (transactions: ApiTransaction[]) => {
+    let running = 0;
+
+    return transactions
+      .slice()
+      .reverse()
+      .map((tx) => {
+        if (tx.type === "credit") {
+          running -= tx.amount;
+        } else {
+          running += tx.amount;
+        }
+
+        return {
+          ...tx,
+          runningBalance: running,
+        };
+      })
+      .reverse();
+  };
+  const txWithBalance = getRunningTransactions(transactions);
+
+  const calculateBalance = (transactions: ApiTransaction[]) => {
+    let credit = 0;
+    let debit = 0;
+
+    for (const tx of transactions) {
+      if (tx.type === "credit") credit += tx.amount;
+      else debit += tx.amount;
+    }
+
+    return { credit, debit, net: debit - credit };
+  };
+
+  const balance = calculateBalance(transactions);
   const handleCreateReminder = async () => {
     if (!token || !currentOrg || !selectedCustomer) return;
 
@@ -939,7 +974,16 @@ export const LedgerPage: React.FC = () => {
       setRunningAuto(false);
     }
   };
-
+  const formatCurrency = (amount: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency,
+      }).format(amount);
+    } catch {
+      return `₹${amount.toLocaleString("en-IN")}`;
+    }
+  };
   if (!currentOrg) {
     return (
       <AppLayout>
@@ -1054,11 +1098,24 @@ export const LedgerPage: React.FC = () => {
               </form>
             )}
             {txError && <p className="form-error inline">{txError}</p>}
+            <div className="balance-card">
+              <div>
+                Credit: {formatCurrency(balance.credit, currentOrg.currency)}
+              </div>
+              <div>
+                Debit: {formatCurrency(balance.debit, currentOrg.currency)}
+              </div>
+              <div>
+                Net:{" "}
+                {formatCurrency(Math.abs(balance.net), currentOrg.currency)}{" "}
+                {balance.net >= 0 ? "(You will get)" : "(You owe)"}
+              </div>
+            </div>
             <ul className="tx-list">
-              {transactions.map((tx) => (
+              {txWithBalance.map((tx) => (
                 <li
                   key={tx.id}
-                  className="tx-item"
+                  className={`tx-item ${tx.type}`}
                 >
                   <div className="tx-row">
                     <span
@@ -1071,12 +1128,22 @@ export const LedgerPage: React.FC = () => {
                       {tx.type === "credit" ? "Credit" : "Debit"}
                     </span>
                     <span className="tx-amount">
-                      {tx.amount.toFixed(2)} {currentOrg.currency}
+                      {formatCurrency(tx.amount, currentOrg.currency)}
                     </span>
                   </div>
                   <div className="tx-row">
                     <span className="tx-date">
                       {new Date(tx.transactionDate).toLocaleString()}
+                    </span>
+                    <span
+                      className={
+                        tx.runningBalance >= 0
+                          ? "tx-balance positive"
+                          : "tx-balance negative"
+                      }
+                    >
+                      Balance:{" "}
+                      {formatCurrency(tx.runningBalance, currentOrg.currency)}
                     </span>
                     {tx.note && <span className="tx-note">{tx.note}</span>}
                   </div>
@@ -1226,7 +1293,6 @@ export const SettingsPage: React.FC = () => {
       </AppLayout>
     );
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
@@ -1281,9 +1347,9 @@ export const SettingsPage: React.FC = () => {
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
               >
-                <option value="₹">INR (₹)</option>
-                <option value="$">USD ($)</option>
-                <option value="€">EUR (€)</option>
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
               </select>
             </label>
           </div>

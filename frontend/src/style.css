@@ -1,4 +1,11 @@
 /* GLOBAL INPUT FIX */
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+}
 input,
 select {
   border-radius: var(--radius-md);
@@ -7,8 +14,17 @@ select {
   background: rgba(15, 23, 42, 0.6);
   color: var(--text);
   outline: none;
+  transition: all 0.2s ease;
+}
+input:hover,
+select:hover {
+  border-color: var(--accent-soft);
 }
 
+input:focus,
+select:focus {
+  transform: scale(1.01);
+}
 :root[data-theme='light'] input,
 :root[data-theme='light'] select {
   background: #f9fafb;
@@ -84,7 +100,7 @@ a {
   padding: 12px 20px;
   border-bottom: 1px solid var(--border);
   background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -124,9 +140,9 @@ a {
 }
 
 .nav-link.active {
-  border-color: var(--accent-soft);
-  background: var(--accent-soft);
-  color: var(--accent);
+  font-weight: 500;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
 }
 
 .app-header-right {
@@ -245,16 +261,28 @@ a {
   text-decoration: underline;
 }
 
-.btn-primary,
+.btn-primary {
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
 .btn-secondary {
   border-radius: 999px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   font-size: 14px;
   padding: 8px 14px;
   cursor: pointer;
   background: transparent;
 }
-
+.btn-secondary:hover {
+  background: var(--accent-soft);
+}
 .btn-primary {
   background: linear-gradient(135deg, #0ea5e9, #22c55e);
   color: white;
@@ -292,7 +320,15 @@ a {
   padding: 22px 20px 24px;
   box-shadow: var(--shadow-soft);
 }
+h1 {
+  font-size: 24px;
+  font-weight: 600;
+}
 
+h3 {
+  font-size: 16px;
+  font-weight: 500;
+}
 .page h1 {
   margin: 0 0 4px;
   font-size: 22px;
@@ -532,19 +568,21 @@ a {
 }
 
 .customer-item {
-  padding: 6px 8px;
+  padding: 8px 8px;
   border-radius: var(--radius-md);
   cursor: pointer;
   border: 1px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .customer-item:hover {
-  border-color: var(--border);
+   background: rgba(37, 99, 235, 0.08);
 }
 
 .customer-item.active {
   border-color: var(--accent-soft);
-  background: var(--accent-soft);
+  background: rgba(37, 99, 235, 0.15);
+  border-left: 3px solid #2563eb;
 }
 
 .customer-name {
@@ -592,15 +630,19 @@ a {
 }
 
 .tx-item {
-  padding: 6px 8px;
-  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   font-size: 13px;
+  background: rgba(15, 23, 42, 0.5);
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .tx-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
 }
 
@@ -611,17 +653,18 @@ a {
 }
 
 .tx-type.credit {
-  background: rgba(34, 197, 94, 0.18);
-  color: #4ade80;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .tx-type.debit {
-  background: rgba(248, 113, 113, 0.18);
-  color: #fca5a5;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .tx-amount {
   font-weight: 600;
+  font-size: 14px;
 }
 
 .tx-date {
@@ -636,10 +679,12 @@ a {
 .reminder-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 8px;
 }
-
+.reminder-actions .card {
+  padding: 12px;
+}
 .reminder-list {
   list-style: none;
   padding: 0;
@@ -698,4 +743,105 @@ a {
 .reminder-date {
   font-size: 11px;
   color: var(--muted);
+}
+.tx-balance {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.balance-card {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+:root[data-theme='light'] .balance-card {
+  background: #f8fafc;
+}
+.balance-card .net {
+  font-weight: 600;
+}
+
+.balance-card .positive {
+  color: #16a34a; /* green */
+}
+
+.balance-card .negative {
+  color: #dc2626; /* red */
+}
+.tx-item {
+  transition: all 0.2s ease;
+}
+
+.tx-item:hover {
+  border-color: var(--accent-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+.net.positive {
+  color: #16a34a; /* green → you will get */
+}
+
+.net.negative {
+  color: #dc2626; /* red → you owe */
+}
+.tx-balance.positive {
+  color: #16a34a; /* green */
+}
+
+.tx-balance.negative {
+  color: #dc2626; /* red */
+}
+:root[data-theme='light'] .tx-item {
+  background: #ffffff;
+}
+.tx-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+.tx-item.credit::before {
+  background: #dc2626;
+}
+
+.tx-item.debit::before {
+  background: #16a34a;
+}
+.tx-list {
+  scroll-behavior: smooth;
+}
+.card,
+.ledger-column {
+  padding: var(--space-lg);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+:root[data-theme='light'] .app-header {
+  background: rgba(255, 255, 255, 0.9);
+}
+.card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
 }
