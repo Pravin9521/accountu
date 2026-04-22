@@ -1,3 +1,24 @@
+/* GLOBAL INPUT FIX */
+input,
+select {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text);
+  outline: none;
+}
+
+:root[data-theme='light'] input,
+:root[data-theme='light'] select {
+  background: #f9fafb;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
+}
 :root {
   --bg: #0f172a;
   --bg-elevated: #020617;
@@ -16,13 +37,15 @@
 }
 
 :root[data-theme='light'] {
-  --bg: #f9fafb;
-  --bg-elevated: #ffffff;
+  --bg: #f5f7fb;              /* main background (slightly tinted) */
+  --bg-elevated: #ffffff;     /* cards */
   --border: #e5e7eb;
-  --text: #111827;
-  --muted: #6b7280;
-  --accent: #0ea5e9;
-  --accent-soft: rgba(14, 165, 233, 0.12);
+  --text: #0f172a;
+  --muted: #64748b;
+
+  --accent: #2563eb;          /* stronger blue */
+  --accent-soft: rgba(37, 99, 235, 0.12);
+
   --danger: #dc2626;
 }
 
@@ -189,6 +212,9 @@ a {
 
 :root[data-theme='light'] .form-field input {
   background: #f9fafb;
+}
+:root[data-theme='light'] .page {
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
 }
 
 .form-field input:focus {
