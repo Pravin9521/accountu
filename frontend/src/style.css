@@ -1,3 +1,24 @@
+/* GLOBAL INPUT FIX */
+input,
+select {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text);
+  outline: none;
+}
+
+:root[data-theme='light'] input,
+:root[data-theme='light'] select {
+  background: #f9fafb;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
+}
 :root {
   --bg: #0f172a;
   --bg-elevated: #020617;
