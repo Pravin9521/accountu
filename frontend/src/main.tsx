@@ -1233,10 +1233,11 @@ export const SettingsPage: React.FC = () => {
     setSaving(true);
     setMessage(null);
     setError(null);
+    const cleanCurrency = currency.trim().split(" ")[0];
     try {
       await updateOrganizationApi(token, currentOrg.id, {
         name,
-        currency,
+        currency: cleanCurrency,
         logoUrl: logoUrl || undefined,
         contactPhone: contactPhone || undefined,
         contactEmail: contactEmail || undefined,
@@ -1276,12 +1277,14 @@ export const SettingsPage: React.FC = () => {
             </label>
             <label className="form-field">
               <span>Currency</span>
-              <input
-                type="text"
+              <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                placeholder="INR, USD, etc."
-              />
+              >
+                <option value="₹">INR (₹)</option>
+                <option value="$">USD ($)</option>
+                <option value="€">EUR (€)</option>
+              </select>
             </label>
           </div>
           <div className="settings-grid">
