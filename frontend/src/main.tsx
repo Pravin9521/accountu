@@ -580,7 +580,17 @@ export const DashboardPage: React.FC = () => {
 
     void load();
   }, [token, currentOrg]);
-
+  const formatCurrency = (amount: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `₹${amount.toLocaleString("en-IN")}`;
+    }
+  };
   return (
     <AppLayout>
       <section className="page">
@@ -619,7 +629,8 @@ export const DashboardPage: React.FC = () => {
                 <div className="org-meta">
                   <span className="org-badge">Active</span>
                   <span className="org-currency">
-                    Currency: {currentOrg.currency}
+                    Currency: {currentOrg.currency} (
+                    {formatCurrency(1, currentOrg.currency)})
                   </span>
                 </div>
               )}
@@ -654,25 +665,32 @@ export const DashboardPage: React.FC = () => {
           {dataError && <p className="form-error inline">{dataError}</p>}
         </div>
         {overview && (
-          <div className="dashboard-grid">
-            <div className="card">
-              <h3>Total receivable</h3>
-              <p className="metric">
-                {overview.totals.receivable.toFixed(2)}{" "}
-                {overview.totals.currency}
-              </p>
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <span className="metric-label">Total receivable</span>
+              <span className="metric-value metric-receivable">
+                {formatCurrency(
+                  overview.totals.receivable,
+                  overview.totals.currency,
+                )}
+              </span>
             </div>
             <div className="card">
               <h3>Total payable</h3>
               <p className="metric">
-                {overview.totals.payable.toFixed(2)} {overview.totals.currency}
+                {formatCurrency(
+                  overview.totals.receivable,
+                  overview.totals.currency,
+                )}
               </p>
             </div>
             <div className="card">
               <h3>Interest accrued</h3>
               <p className="metric">
-                {overview.totals.interestAccrued.toFixed(2)}{" "}
-                {overview.totals.currency}
+                {formatCurrency(
+                  overview.totals.receivable,
+                  overview.totals.currency,
+                )}
               </p>
             </div>
           </div>
@@ -691,13 +709,15 @@ export const DashboardPage: React.FC = () => {
                   </div>
                   <div className="monthly-values">
                     <span>
-                      Credit: {m.totalCredit.toFixed(2)} {monthly.currency}
+                      Credit: {formatCurrency(m.totalCredit, monthly.currency)}
                     </span>
                     <span>
-                      Debit: {m.totalDebit.toFixed(2)} {monthly.currency}
+                      Debit: {formatCurrency(m.totalDebit, monthly.currency)}
                     </span>
-                    <span>
-                      Net: {m.net.toFixed(2)} {monthly.currency}
+                    <span
+                      className={m.net >= 0 ? "net positive" : "net negative"}
+                    >
+                      Net: {formatCurrency(Math.abs(m.net), monthly.currency)}
                     </span>
                   </div>
                 </div>
@@ -979,6 +999,7 @@ export const LedgerPage: React.FC = () => {
       return new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency,
+        maximumFractionDigits: 0,
       }).format(amount);
     } catch {
       return `₹${amount.toLocaleString("en-IN")}`;

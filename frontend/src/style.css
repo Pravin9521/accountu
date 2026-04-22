@@ -845,3 +845,45 @@ h3 {
   background: var(--border);
   border-radius: 10px;
 }
+.metric-card {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+:root[data-theme='light'] .metric-card {
+  background: #ffffff;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+.metric-value {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.metric-receivable {
+  color: #16a34a; /* green */
+}
+
+.metric-payable {
+  color: #dc2626; /* red */
+}
+
+.metric-interest {
+  color: #2563eb; /* blue */
+}
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
