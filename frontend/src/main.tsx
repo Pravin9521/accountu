@@ -580,6 +580,21 @@ export const DashboardPage: React.FC = () => {
 
     void load();
   }, [token, currentOrg]);
+  const getTrend = (monthly: MonthlyReport | null) => {
+    if (!monthly || monthly.monthly.length < 2) return null;
+
+    const last = monthly.monthly[monthly.monthly.length - 1];
+    const prev = monthly.monthly[monthly.monthly.length - 2];
+
+    const diff = last.net - prev.net;
+    const percent = prev.net !== 0 ? (diff / Math.abs(prev.net)) * 100 : 0;
+
+    return {
+      value: percent,
+      isPositive: percent >= 0,
+    };
+  };
+  const trend = getTrend(monthly);
   const formatCurrency = (amount: number, currency: string) => {
     try {
       return new Intl.NumberFormat("en-IN", {
@@ -668,30 +683,68 @@ export const DashboardPage: React.FC = () => {
           <div className="metrics-grid">
             <div className="metric-card">
               <span className="metric-label">Total receivable</span>
-              <span className="metric-value metric-receivable">
+
+              <div className="metric-row">
+                <span className="metric-value metric-receivable">
+                  {formatCurrency(
+                    overview.totals.receivable,
+                    overview.totals.currency,
+                  )}
+                </span>
+
+                {trend && (
+                  <span
+                    className={`metric-trend ${
+                      trend.isPositive ? "positive" : "negative"
+                    }`}
+                  >
+                    {trend.isPositive ? "+" : ""}
+                    {trend.value.toFixed(1)}%
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="metric-card">
+              <span className="metric-label">Total payable</span>
+              <span
+                className={`metric-value ${
+                  overview.totals.payable > 0 ? "metric-payable" : "muted"
+                }`}
+              >
                 {formatCurrency(
-                  overview.totals.receivable,
+                  overview.totals.payable,
                   overview.totals.currency,
                 )}
               </span>
+              {trend && (
+                <span
+                  className={`metric-trend ${
+                    trend.isPositive ? "positive" : "negative"
+                  }`}
+                >
+                  {trend.isPositive ? "+" : ""}
+                  {trend.value.toFixed(1)}%
+                </span>
+              )}
             </div>
-            <div className="card">
-              <h3>Total payable</h3>
-              <p className="metric">
+            <div className="metric-card">
+              <span className="metric-label">Interest accrued</span>
+              <span className="metric-value metric-interest">
                 {formatCurrency(
-                  overview.totals.receivable,
+                  overview.totals.interestAccrued,
                   overview.totals.currency,
                 )}
-              </p>
-            </div>
-            <div className="card">
-              <h3>Interest accrued</h3>
-              <p className="metric">
-                {formatCurrency(
-                  overview.totals.receivable,
-                  overview.totals.currency,
-                )}
-              </p>
+              </span>
+              {trend && (
+                <span
+                  className={`metric-trend ${
+                    trend.isPositive ? "positive" : "negative"
+                  }`}
+                >
+                  {trend.isPositive ? "+" : ""}
+                  {trend.value.toFixed(1)}%
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -708,10 +761,10 @@ export const DashboardPage: React.FC = () => {
                     {m.year}-{String(m.month).padStart(2, "0")}
                   </div>
                   <div className="monthly-values">
-                    <span>
+                    <span className="credit">
                       Credit: {formatCurrency(m.totalCredit, monthly.currency)}
                     </span>
-                    <span>
+                    <span className="debit">
                       Debit: {formatCurrency(m.totalDebit, monthly.currency)}
                     </span>
                     <span
@@ -1138,36 +1191,38 @@ export const LedgerPage: React.FC = () => {
                   key={tx.id}
                   className={`tx-item ${tx.type}`}
                 >
-                  <div className="tx-row">
-                    <span
-                      className={
-                        tx.type === "credit"
-                          ? "tx-type credit"
-                          : "tx-type debit"
-                      }
-                    >
+                  {/* Row 1: Type + Amount */}
+                  <div className="tx-row top">
+                    <span className={`tx-type ${tx.type}`}>
                       {tx.type === "credit" ? "Credit" : "Debit"}
                     </span>
+
                     <span className="tx-amount">
                       {formatCurrency(tx.amount, currentOrg.currency)}
                     </span>
                   </div>
-                  <div className="tx-row">
+
+                  {/* Row 2: Date + Balance */}
+                  <div className="tx-row bottom">
                     <span className="tx-date">
                       {new Date(tx.transactionDate).toLocaleString()}
                     </span>
+
                     <span
-                      className={
-                        tx.runningBalance >= 0
-                          ? "tx-balance positive"
-                          : "tx-balance negative"
-                      }
+                      className={`tx-balance ${
+                        Number(tx.runningBalance) >= 0 ? "positive" : "negative"
+                      }`}
                     >
                       Balance:{" "}
-                      {formatCurrency(tx.runningBalance, currentOrg.currency)}
+                      {formatCurrency(
+                        Math.abs(tx.runningBalance),
+                        currentOrg.currency,
+                      )}
                     </span>
-                    {tx.note && <span className="tx-note">{tx.note}</span>}
                   </div>
+
+                  {/* Row 3: Note */}
+                  {tx.note && <div className="tx-note">{tx.note}</div>}
                 </li>
               ))}
             </ul>
