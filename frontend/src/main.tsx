@@ -342,7 +342,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({
 }) => (
   <div className="auth-shell">
     <div className="auth-card">
-      <h1 className="auth-title">Accountu</h1>
+      <div className="auth-header">
+        <span className="auth-title">Accountu</span>
+        <ThemeToggle />
+      </div>
+
       {children}
     </div>
   </div>
@@ -351,6 +355,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -394,6 +399,7 @@ export const LoginPage: React.FC = () => {
           <span>Email</span>
           <input
             type="email"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -401,13 +407,25 @@ export const LoginPage: React.FC = () => {
         </label>
         <label className="form-field">
           <span>Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-          />
+
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+
+            <span
+              className="toggle-password"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
         </label>
         {error && <div className="form-error">{error}</div>}
         <button
@@ -580,7 +598,32 @@ export const DashboardPage: React.FC = () => {
 
     void load();
   }, [token, currentOrg]);
+  const getTrend = (monthly: MonthlyReport | null) => {
+    if (!monthly || monthly.monthly.length < 2) return null;
 
+    const last = monthly.monthly[monthly.monthly.length - 1];
+    const prev = monthly.monthly[monthly.monthly.length - 2];
+
+    const diff = last.net - prev.net;
+    const percent = prev.net !== 0 ? (diff / Math.abs(prev.net)) * 100 : 0;
+
+    return {
+      value: percent,
+      isPositive: percent >= 0,
+    };
+  };
+  const trend = getTrend(monthly);
+  const formatCurrency = (amount: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `₹${amount.toLocaleString("en-IN")}`;
+    }
+  };
   return (
     <AppLayout>
       <section className="page">
@@ -619,7 +662,8 @@ export const DashboardPage: React.FC = () => {
                 <div className="org-meta">
                   <span className="org-badge">Active</span>
                   <span className="org-currency">
-                    Currency: {currentOrg.currency}
+                    Currency: {currentOrg.currency} (
+                    {formatCurrency(1, currentOrg.currency)})
                   </span>
                 </div>
               )}
@@ -654,26 +698,71 @@ export const DashboardPage: React.FC = () => {
           {dataError && <p className="form-error inline">{dataError}</p>}
         </div>
         {overview && (
-          <div className="dashboard-grid">
-            <div className="card">
-              <h3>Total receivable</h3>
-              <p className="metric">
-                {overview.totals.receivable.toFixed(2)}{" "}
-                {overview.totals.currency}
-              </p>
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <span className="metric-label">Total receivable</span>
+
+              <div className="metric-row">
+                <span className="metric-value metric-receivable">
+                  {formatCurrency(
+                    overview.totals.receivable,
+                    overview.totals.currency,
+                  )}
+                </span>
+
+                {trend && (
+                  <span
+                    className={`metric-trend ${
+                      trend.isPositive ? "positive" : "negative"
+                    }`}
+                  >
+                    {trend.isPositive ? "+" : ""}
+                    {trend.value.toFixed(1)}%
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="card">
-              <h3>Total payable</h3>
-              <p className="metric">
-                {overview.totals.payable.toFixed(2)} {overview.totals.currency}
-              </p>
+            <div className="metric-card">
+              <span className="metric-label">Total payable</span>
+              <span
+                className={`metric-value ${
+                  overview.totals.payable > 0 ? "metric-payable" : "muted"
+                }`}
+              >
+                {formatCurrency(
+                  overview.totals.payable,
+                  overview.totals.currency,
+                )}
+              </span>
+              {trend && (
+                <span
+                  className={`metric-trend ${
+                    trend.isPositive ? "positive" : "negative"
+                  }`}
+                >
+                  {trend.isPositive ? "+" : ""}
+                  {trend.value.toFixed(1)}%
+                </span>
+              )}
             </div>
-            <div className="card">
-              <h3>Interest accrued</h3>
-              <p className="metric">
-                {overview.totals.interestAccrued.toFixed(2)}{" "}
-                {overview.totals.currency}
-              </p>
+            <div className="metric-card">
+              <span className="metric-label">Interest accrued</span>
+              <span className="metric-value metric-interest">
+                {formatCurrency(
+                  overview.totals.interestAccrued,
+                  overview.totals.currency,
+                )}
+              </span>
+              {trend && (
+                <span
+                  className={`metric-trend ${
+                    trend.isPositive ? "positive" : "negative"
+                  }`}
+                >
+                  {trend.isPositive ? "+" : ""}
+                  {trend.value.toFixed(1)}%
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -690,14 +779,16 @@ export const DashboardPage: React.FC = () => {
                     {m.year}-{String(m.month).padStart(2, "0")}
                   </div>
                   <div className="monthly-values">
-                    <span>
-                      Credit: {m.totalCredit.toFixed(2)} {monthly.currency}
+                    <span className="credit">
+                      Credit: {formatCurrency(m.totalCredit, monthly.currency)}
                     </span>
-                    <span>
-                      Debit: {m.totalDebit.toFixed(2)} {monthly.currency}
+                    <span className="debit">
+                      Debit: {formatCurrency(m.totalDebit, monthly.currency)}
                     </span>
-                    <span>
-                      Net: {m.net.toFixed(2)} {monthly.currency}
+                    <span
+                      className={m.net >= 0 ? "net positive" : "net negative"}
+                    >
+                      Net: {formatCurrency(Math.abs(m.net), monthly.currency)}
                     </span>
                   </div>
                 </div>
@@ -765,6 +856,41 @@ export const LedgerPage: React.FC = () => {
       setLoading(false);
     }
   };
+  const getRunningTransactions = (transactions: ApiTransaction[]) => {
+    let running = 0;
+
+    return transactions
+      .slice()
+      .reverse()
+      .map((tx) => {
+        if (tx.type === "credit") {
+          running -= tx.amount;
+        } else {
+          running += tx.amount;
+        }
+
+        return {
+          ...tx,
+          runningBalance: running,
+        };
+      })
+      .reverse();
+  };
+  const txWithBalance = getRunningTransactions(transactions);
+
+  const calculateBalance = (transactions: ApiTransaction[]) => {
+    let credit = 0;
+    let debit = 0;
+
+    for (const tx of transactions) {
+      if (tx.type === "credit") credit += tx.amount;
+      else debit += tx.amount;
+    }
+
+    return { credit, debit, net: debit - credit };
+  };
+
+  const balance = calculateBalance(transactions);
   const handleCreateReminder = async () => {
     if (!token || !currentOrg || !selectedCustomer) return;
 
@@ -939,7 +1065,17 @@ export const LedgerPage: React.FC = () => {
       setRunningAuto(false);
     }
   };
-
+  const formatCurrency = (amount: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `₹${amount.toLocaleString("en-IN")}`;
+    }
+  };
   if (!currentOrg) {
     return (
       <AppLayout>
@@ -1054,32 +1190,57 @@ export const LedgerPage: React.FC = () => {
               </form>
             )}
             {txError && <p className="form-error inline">{txError}</p>}
+            <div className="balance-card">
+              <div>
+                Credit: {formatCurrency(balance.credit, currentOrg.currency)}
+              </div>
+              <div>
+                Debit: {formatCurrency(balance.debit, currentOrg.currency)}
+              </div>
+              <div>
+                Net:{" "}
+                {formatCurrency(Math.abs(balance.net), currentOrg.currency)}{" "}
+                {balance.net >= 0 ? "(You will get)" : "(You owe)"}
+              </div>
+            </div>
             <ul className="tx-list">
-              {transactions.map((tx) => (
+              {txWithBalance.map((tx) => (
                 <li
                   key={tx.id}
-                  className="tx-item"
+                  className={`tx-item ${tx.type}`}
                 >
-                  <div className="tx-row">
-                    <span
-                      className={
-                        tx.type === "credit"
-                          ? "tx-type credit"
-                          : "tx-type debit"
-                      }
-                    >
+                  {/* Row 1: Type + Amount */}
+                  <div className="tx-row top">
+                    <span className={`tx-type ${tx.type}`}>
                       {tx.type === "credit" ? "Credit" : "Debit"}
                     </span>
+
                     <span className="tx-amount">
-                      {tx.amount.toFixed(2)} {currentOrg.currency}
+                      {formatCurrency(tx.amount, currentOrg.currency)}
                     </span>
                   </div>
-                  <div className="tx-row">
+
+                  {/* Row 2: Date + Balance */}
+                  <div className="tx-row bottom">
                     <span className="tx-date">
                       {new Date(tx.transactionDate).toLocaleString()}
                     </span>
-                    {tx.note && <span className="tx-note">{tx.note}</span>}
+
+                    <span
+                      className={`tx-balance ${
+                        Number(tx.runningBalance) >= 0 ? "positive" : "negative"
+                      }`}
+                    >
+                      Balance:{" "}
+                      {formatCurrency(
+                        Math.abs(tx.runningBalance),
+                        currentOrg.currency,
+                      )}
+                    </span>
                   </div>
+
+                  {/* Row 3: Note */}
+                  {tx.note && <div className="tx-note">{tx.note}</div>}
                 </li>
               ))}
             </ul>
@@ -1226,17 +1387,17 @@ export const SettingsPage: React.FC = () => {
       </AppLayout>
     );
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
     setSaving(true);
     setMessage(null);
     setError(null);
+    const cleanCurrency = currency.trim().split(" ")[0];
     try {
       await updateOrganizationApi(token, currentOrg.id, {
         name,
-        currency,
+        currency: cleanCurrency,
         logoUrl: logoUrl || undefined,
         contactPhone: contactPhone || undefined,
         contactEmail: contactEmail || undefined,
@@ -1276,12 +1437,14 @@ export const SettingsPage: React.FC = () => {
             </label>
             <label className="form-field">
               <span>Currency</span>
-              <input
-                type="text"
+              <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                placeholder="INR, USD, etc."
-              />
+              >
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+              </select>
             </label>
           </div>
           <div className="settings-grid">
