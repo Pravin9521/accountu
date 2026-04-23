@@ -342,7 +342,11 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({
 }) => (
   <div className="auth-shell">
     <div className="auth-card">
-      <h1 className="auth-title">Accountu</h1>
+      <div className="auth-header">
+        <span className="auth-title">Accountu</span>
+        <ThemeToggle />
+      </div>
+
       {children}
     </div>
   </div>
@@ -351,6 +355,7 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -394,6 +399,7 @@ export const LoginPage: React.FC = () => {
           <span>Email</span>
           <input
             type="email"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -401,13 +407,25 @@ export const LoginPage: React.FC = () => {
         </label>
         <label className="form-field">
           <span>Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-          />
+
+          <div className="password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+
+            <span
+              className="toggle-password"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
         </label>
         {error && <div className="form-error">{error}</div>}
         <button

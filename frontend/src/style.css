@@ -183,7 +183,12 @@ a {
   justify-content: center;
   padding: 24px;
 }
-
+.auth-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
 .auth-card {
   width: 100%;
   max-width: 420px;
@@ -265,11 +270,14 @@ a {
 }
 
 .btn-primary {
-  transition: all 0.2s ease;
+  border: none; /* remove black border */
+  border-radius: 8px;
+  background: linear-gradient(90deg, #22c55e, #06b6d4);
+  color: white;
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }
 
 .btn-primary:active {
@@ -926,4 +934,26 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.toggle-password:hover {
+  color: var(--text);
 }
