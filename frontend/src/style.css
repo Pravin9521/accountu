@@ -495,21 +495,30 @@ h3 {
 }
 
 .monthly-item {
-  border-radius: var(--radius-md);
-  border: 1px dashed var(--border);
+  border-radius: 12px;
+  border: 1px solid var(--border);
   padding: 14px;
   display: flex;
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
   font-size: 13px;
-  background: rgba(15, 23, 42, 0.6);
+
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  transition: all 0.2s ease;
+}
+
+.monthly-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 .monthly-label {
   color: var(--muted);
 }
-
+:root[data-theme='dark'] .monthly-item {
+  background: rgba(15, 23, 42, 0.8);
+}
 .monthly-values {
   display: flex;
   flex-wrap: wrap;
