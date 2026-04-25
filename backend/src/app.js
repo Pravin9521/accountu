@@ -34,6 +34,8 @@ app.use('/api/orgs/:orgId/dashboard', authMiddleware, dashboardRoutes);
 app.use((req, res) => {
   res.status(404).json({ message: 'Not Found' });
 });
-
+app.get("/", (req, res) => {
+  res.send("Accountu API is running 🚀");
+});
 module.exports = app;
 
