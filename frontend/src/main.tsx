@@ -809,7 +809,7 @@ export const LedgerPage: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<ApiCustomer | null>(
     null,
   );
-
+  const [txDate, setTxDate] = useState("");
   const [reminderDate, setReminderDate] = useState("");
   const [repeat, setRepeat] = useState("none");
   const [reminderMessage, setReminderMessage] = useState("");
@@ -1194,6 +1194,11 @@ export const LedgerPage: React.FC = () => {
                   onChange={(e) => setNewTransactionAmount(e.target.value)}
                   min="0"
                   step="0.01"
+                />
+                <input
+                  type="datetime-local"
+                  value={txDate}
+                  onChange={(e) => setTxDate(e.target.value)}
                 />
                 <input
                   type="text"
