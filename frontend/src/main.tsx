@@ -996,6 +996,7 @@ export const LedgerPage: React.FC = () => {
         type: newTransactionType,
         amount,
         note: newTransactionNote || undefined,
+        date: txDate || undefined,
       });
       setTransactions((prev) => [tx, ...prev]);
       setNewTransactionAmount("");
