@@ -284,7 +284,7 @@ export const getTransactionsByCustomerApi = async (
 export const createTransactionApi = async (
   token: string,
   orgId: string,
-  payload: { customerId: string; type: 'credit' | 'debit'; amount: number; note?: string }
+  payload: { customerId: string; type: 'credit' | 'debit'; amount: number; note?: string;date?: string; }
 ): Promise<ApiTransaction> => {
   const res = await fetch(`${getBaseUrl()}/api/orgs/${orgId}/transactions`, {
     method: 'POST',
