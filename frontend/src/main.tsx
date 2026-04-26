@@ -830,7 +830,8 @@ export const LedgerPage: React.FC = () => {
   const [reminderError, setReminderError] = useState<string | null>(null);
   const [sendingReminder, setSendingReminder] = useState(false);
   const [runningAuto, setRunningAuto] = useState(false);
-
+  const [newCustomerEmail, setNewCustomerEmail] = useState("");
+  const [newCustomerPhone, setNewCustomerPhone] = useState("");
   const loadCustomers = async (page: number) => {
     if (!token || !currentOrg) return;
     setLoading(true);
@@ -965,10 +966,14 @@ export const LedgerPage: React.FC = () => {
     try {
       const customer = await createCustomerApi(token, currentOrg.id, {
         name: newCustomerName.trim(),
+        email: newCustomerEmail || undefined,
+        phone: newCustomerPhone || undefined,
       });
       setCustomers((prev) => [customer, ...prev]);
       setSelectedCustomer(customer);
       setNewCustomerName("");
+      setNewCustomerEmail("");
+      setNewCustomerPhone("");
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Failed to create customer";
@@ -1003,16 +1008,19 @@ export const LedgerPage: React.FC = () => {
   };
 
   const loadOrgReminders = async () => {
-    if (!token || !currentOrg) return;
+    if (!token || !currentOrg || !selectedCustomer) return;
+
     setReminderLoading(true);
     setReminderError(null);
+
     try {
-      const res: PagedResponse<ApiReminder> = await listOrgRemindersApi(
-        token,
-        currentOrg.id,
-        { page: 1 },
+      const res = await listOrgRemindersApi(token, currentOrg.id, { page: 1 });
+
+      const filtered = res.items.filter(
+        (r) => r.customer === selectedCustomer.id,
       );
-      setReminders(res.items);
+
+      setReminders(filtered);
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Failed to load reminders";
@@ -1025,7 +1033,7 @@ export const LedgerPage: React.FC = () => {
   useEffect(() => {
     void loadOrgReminders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, currentOrg?.id]);
+  }, [token, currentOrg?.id, selectedCustomer?.id]);
 
   const handleSendReminder = async () => {
     if (!token || !currentOrg || !selectedCustomer) return;
@@ -1110,6 +1118,18 @@ export const LedgerPage: React.FC = () => {
                 placeholder="Add customer by name"
                 value={newCustomerName}
                 onChange={(e) => setNewCustomerName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Phone (recommended)"
+                value={newCustomerPhone}
+                onChange={(e) => setNewCustomerPhone(e.target.value)}
+              />
+              <input
+                type="email"
+                placeholder="Email (optional)"
+                value={newCustomerEmail}
+                onChange={(e) => setNewCustomerEmail(e.target.value)}
               />
               <button
                 type="submit"
@@ -1302,11 +1322,28 @@ export const LedgerPage: React.FC = () => {
               <button
                 className="btn-secondary"
                 type="button"
-                disabled={!selectedCustomer || sendingReminder}
+                disabled={
+                  !selectedCustomer ||
+                  sendingReminder ||
+                  (!selectedCustomer.email && !selectedCustomer.phone)
+                }
                 onClick={handleSendReminder}
               >
-                {sendingReminder ? "Sending…" : "Send reminder to customer"}
+                {sendingReminder
+                  ? "Sending…"
+                  : selectedCustomer &&
+                      !selectedCustomer.email &&
+                      !selectedCustomer.phone
+                    ? "No contact info"
+                    : "Send reminder"}
               </button>
+              {selectedCustomer &&
+                !selectedCustomer.phone &&
+                !selectedCustomer.email && (
+                  <p className="form-error inline">
+                    Add phone or email to send reminder
+                  </p>
+                )}
               <button
                 className="btn-secondary"
                 type="button"
